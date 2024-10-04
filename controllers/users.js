@@ -33,9 +33,9 @@ const getUserById = (req, res) => {
     .catch((err) => {
       console.error(err);
       if (err.name === "DocumentNotFound") {
-        // ... figure out how to handle the above here (404 error)
+        res.status(404).send({ message: err.message });
       } else if (err.name === "CastError") {
-        //handle the cast error (400 error)
+        res.status(400).send({ message: err.message });
       }
       return res.status(500).send({ message: err.message });
     });
