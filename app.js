@@ -12,7 +12,11 @@ mongoose
   })
   .catch(console.error);
 
+const routes = require("./routes");
 app.use(express.json());
+
+app.use(routes);
+
 app.use("/", indexRouter);
 
 app.listen(PORT, () => {
