@@ -23,7 +23,7 @@ const createItem = (req, res) => {
 };
 
 const getItems = (req, res) => {
-  ClothingItem.find({}).then((items) => res.status(200).send(items));
+  ClothingItem.find({}).then((items) => res.send(items));
 
   if (err.name === "ValidationError") {
     res
