@@ -1,5 +1,11 @@
 const User = require("../models/user");
 
+const {
+  INT_SERVER_ERROR_CODE,
+  BAD_REQUEST_CODE,
+  NOT_FOUND_CODE,
+} = require("../utils/errors");
+
 // GET /users
 
 const getUsers = (req, res) => {
@@ -7,7 +13,9 @@ const getUsers = (req, res) => {
     .then((users) => res.status(200).send(users))
     .catch((err) => {
       console.error(err);
-      return res.status(500).send({ message: err.message });
+      return res
+        .status(INT_SERVER_ERROR_CODE)
+        .send({ message: `${INT_SERVER_ERROR_CODE} Server Error` });
     });
 };
 
@@ -19,9 +27,13 @@ const createUser = (req, res) => {
     .catch((err) => {
       console.error(err);
       if (err.name === "ValidationError") {
-        return res.status(400).send({ message: err.message });
+        return res
+          .status(BAD_REQUEST_CODE)
+          .send({ message: `${BAD_REQUEST_CODE} Validation Failed` });
       }
-      return res.status(500).send({ message: err.message });
+      return res
+        .status(INT_SERVER_ERROR_CODE)
+        .send({ message: `${INT_SERVER_ERROR_CODE} Server Error` });
     });
 };
 
@@ -33,11 +45,17 @@ const getUserById = (req, res) => {
     .catch((err) => {
       console.error(err);
       if (err.name === "DocumentNotFound") {
-        res.status(404).send({ message: err.message });
+        res
+          .status(NOT_FOUND_CODE)
+          .send({ message: `${NOT_FOUND_CODE} Information Not Found` });
       } else if (err.name === "CastError") {
-        res.status(400).send({ message: err.message });
+        res
+          .status(BAD_REQUEST_CODE)
+          .send({ message: `${BAD_REQUEST_CODE} Incomplete information` });
       }
-      return res.status(404).send({ message: err.message });
+      return res
+        .status(NOT_FOUND_CODE)
+        .send({ message: `${NOT_FOUND_CODE} Data Not Found` });
     });
 };
 
