@@ -3,6 +3,7 @@ const ClothingItem = require("../models/clothingItem");
 const {
   INT_SERVER_ERROR_CODE,
   BAD_REQUEST_CODE,
+  NOT_FOUND_CODE,
   returnError,
 } = require("../utils/errors");
 
@@ -83,10 +84,16 @@ const deleteItem = (req, res) => {
         res
           .status(BAD_REQUEST_CODE)
           .send({ message: `${BAD_REQUEST_CODE} Validation Failed` });
-      } else if (error.name === "") {
+      }
+      if (error.name === INT_SERVER_ERROR_CODE) {
         res
           .status(INT_SERVER_ERROR_CODE)
           .send({ message: `${INT_SERVER_ERROR_CODE} Server Error` });
+      }
+      if (error.name === "DocumentNotFoundError") {
+        res
+          .status(NOT_FOUND_CODE)
+          .send({ message: `${NOT_FOUND_CODE} Document Not Found` });
       }
     });
 };
