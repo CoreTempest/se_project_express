@@ -1,39 +1,47 @@
 const ClothingItem = require("../models/clothingItem");
 
-const { INT_SERVER_ERROR_CODE, BAD_REQUEST_CODE } = require("../utils/errors");
+const {
+  INT_SERVER_ERROR_CODE,
+  BAD_REQUEST_CODE,
+  returnError,
+} = require("../utils/errors");
 
 const createItem = (req, res) => {
-  console.log(req);
-  console.log(req.body);
-
-  const { name, weather, imageURL } = req.body;
+  const { name, weather, imageUrl } = req.body;
 
   const { owner } = req.user._id;
 
-  ClothingItem.create({ name, weather, imageURL, owner })
+  ClothingItem.create({ name, weather, imageUrl, owner })
     .then((item) => {
-      console.log(item);
       res.send({ data: item });
     })
-    .catch((e) => {
-      res
-        .status(INT_SERVER_ERROR_CODE)
-        .send({ message: `${INT_SERVER_ERROR_CODE} Server Error` });
+    .catch((error) => {
+      if (error.name === "ValidationError") {
+        res
+          .status(BAD_REQUEST_CODE)
+          .send({ message: `${BAD_REQUEST_CODE} Validation Failed` });
+      } else if (error.name === "") {
+        res
+          .status(INT_SERVER_ERROR_CODE)
+          .send({ message: `${INT_SERVER_ERROR_CODE} Server Error` });
+      }
     });
 };
 
 const getItems = (req, res) => {
-  ClothingItem.find({}).then((items) => res.send(items));
-
-  if (err.name === "ValidationError") {
-    res
-      .status(BAD_REQUEST_CODE)
-      .send({ message: `${BAD_REQUEST_CODE} Validation Failed` });
-  } else if (err.name === "") {
-    res
-      .status(INT_SERVER_ERROR_CODE)
-      .send({ message: `${INT_SERVER_ERROR_CODE} Server Error` });
-  }
+  ClothingItem.find({})
+    .then((item) => res.status(200).send(item))
+    .catch((error) => {
+      if (error.name === "ValidationError") {
+        res
+          .status(BAD_REQUEST_CODE)
+          .send({ message: `${BAD_REQUEST_CODE} Validation Failed` });
+      } else if (error.name === "") {
+        res
+          .status(INT_SERVER_ERROR_CODE)
+          .send({ message: `${INT_SERVER_ERROR_CODE} Server Error` });
+      }
+    });
 };
 
 const likeItem = (req, res) => {
@@ -67,19 +75,20 @@ const dislikeItem = (req, res) => {
 const deleteItem = (req, res) => {
   const { itemId } = req.params;
 
-  console.log(itemId);
   ClothingItem.findByIdAndDelete(itemId)
     .orFail()
-    .then((item) => res.status(204).send({}));
-  if (err.name === "CastError") {
-    res
-      .status(BAD_REQUEST_CODE)
-      .send({ message: `${BAD_REQUEST_CODE} Validation Failed` });
-  } else if (err.name === "") {
-    res
-      .status(INT_SERVER_ERROR_CODE)
-      .send({ message: `${INT_SERVER_ERROR_CODE} Server Error` });
-  }
+    .then(() => res.status(200).send({ message: "Item Successfully Removed" }))
+    .catch((error) => {
+      if (error.name === "CastError") {
+        res
+          .status(BAD_REQUEST_CODE)
+          .send({ message: `${BAD_REQUEST_CODE} Validation Failed` });
+      } else if (error.name === "") {
+        res
+          .status(INT_SERVER_ERROR_CODE)
+          .send({ message: `${INT_SERVER_ERROR_CODE} Server Error` });
+      }
+    });
 };
 
 module.exports = {
