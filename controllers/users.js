@@ -54,8 +54,8 @@ const getUserById = (req, res) => {
           .send({ message: `${BAD_REQUEST_CODE} Incomplete information` });
       }
       return res
-        .status(NOT_FOUND_CODE)
-        .send({ message: `${NOT_FOUND_CODE} Data Not Found` });
+        .status(INT_SERVER_ERROR_CODE)
+        .send({ message: `${INT_SERVER_ERROR_CODE} Server Error` });
     });
 };
 

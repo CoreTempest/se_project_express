@@ -21,7 +21,7 @@ const createItem = (req, res) => {
         res
           .status(BAD_REQUEST_CODE)
           .send({ message: `${BAD_REQUEST_CODE} Validation Failed` });
-      } else if (error.name === "") {
+      } else {
         res
           .status(INT_SERVER_ERROR_CODE)
           .send({ message: `${INT_SERVER_ERROR_CODE} Server Error` });
@@ -37,7 +37,7 @@ const getItems = (req, res) => {
         res
           .status(BAD_REQUEST_CODE)
           .send({ message: `${BAD_REQUEST_CODE} Validation Failed` });
-      } else if (error.name === "") {
+      } else {
         res
           .status(INT_SERVER_ERROR_CODE)
           .send({ message: `${INT_SERVER_ERROR_CODE} Server Error` });
@@ -46,14 +46,22 @@ const getItems = (req, res) => {
 };
 
 const likeItem = (req, res) => {
-  ClothingItem.findByIdAndUpdate(req.params.itemId)
+  ClothingItem.findByIdAndUpdate(
+    req.params.itemId,
+    { $addToSet: { likes: req.user._id } },
+    { new: true }
+  )
     .orFail()
     .then((item) => res.send({ data: item }))
     .catch((error) => returnError(res, error));
 };
 
 const dislikeItem = (req, res) => {
-  ClothingItem.findByIdAndUpdate(req.params.itemId)
+  ClothingItem.findByIdAndUpdate(
+    req.params.itemId,
+    { $pull: { likes: req.user._id } },
+    { new: true }
+  )
     .orFail()
     .then((item) => res.send({ data: item }))
     .catch((error) => returnError(res, error));
@@ -85,15 +93,14 @@ const deleteItem = (req, res) => {
           .status(BAD_REQUEST_CODE)
           .send({ message: `${BAD_REQUEST_CODE} Validation Failed` });
       }
-      if (error.name === INT_SERVER_ERROR_CODE) {
-        res
-          .status(INT_SERVER_ERROR_CODE)
-          .send({ message: `${INT_SERVER_ERROR_CODE} Server Error` });
-      }
       if (error.name === "DocumentNotFoundError") {
         res
           .status(NOT_FOUND_CODE)
           .send({ message: `${NOT_FOUND_CODE} Document Not Found` });
+      } else {
+        res
+          .status(INT_SERVER_ERROR_CODE)
+          .send({ message: `${INT_SERVER_ERROR_CODE} Server Error` });
       }
     });
 };
