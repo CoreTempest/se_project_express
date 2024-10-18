@@ -4,7 +4,10 @@ const {
   INT_SERVER_ERROR_CODE,
   BAD_REQUEST_CODE,
   NOT_FOUND_CODE,
+  CONFLICT,
 } = require("../utils/errors");
+
+const { JWT_SECRET } = require("../utils/config");
 
 // GET /users
 
@@ -20,10 +23,14 @@ const getUsers = (req, res) => {
 };
 
 const createUser = (req, res) => {
-  const { name, avatar } = req.body;
-
-  User.create({ name, avatar })
-    .then((user) => res.status(201).send(user))
+  const { name, avatar, email, password } = req.body;
+  bcrypt
+    .hash(password, 8)
+    .then((hash) =>
+      User.create({ name, avatar, email, password: hash }).then((user) =>
+        res.status(201).send(user)
+      )
+    )
     .catch((err) => {
       console.error(err);
       if (err.name === "ValidationError") {
@@ -31,9 +38,41 @@ const createUser = (req, res) => {
           .status(BAD_REQUEST_CODE)
           .send({ message: `${BAD_REQUEST_CODE} Validation Failed` });
       }
+      if (err.code === 11000) {
+        return res
+          .status(CONFLICT)
+          .send({ message: "User with this email already exists" });
+      }
       return res
         .status(INT_SERVER_ERROR_CODE)
         .send({ message: `${INT_SERVER_ERROR_CODE} Server Error` });
+    });
+};
+
+const login = (req, res) => {
+  const { email, password } = req.body;
+
+  if (!email || !password) {
+    return res
+      .status(BAD_REQUEST)
+      .send({ message: "Email and password are required" });
+  }
+  return User.findUserByCredentials(email, password)
+    .then((user) => {
+      const token = jwt.sign({ _id: user._id }, JWT_SECRET, {
+        expiresIn: "7d",
+      });
+      res.send({ token });
+    })
+    .catch((error) => {
+      if (error.message === "Incorrect email or password") {
+        return res
+          .status(UNAUTHORIZED)
+          .send({ message: "Incorrect email or password" });
+      }
+      return res
+        .status(INT_SERVER_ERROR)
+        .send({ message: "An error has occurred on the server" });
     });
 };
 
