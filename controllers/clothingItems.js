@@ -4,6 +4,7 @@ const {
   INT_SERVER_ERROR_CODE,
   BAD_REQUEST_CODE,
   NOT_FOUND_CODE,
+  FORBIDDEN,
   returnError,
 } = require("../utils/errors");
 
@@ -83,9 +84,21 @@ const dislikeItem = (req, res) => {
 
 const deleteItem = (req, res) => {
   const { itemId } = req.params;
+  const userId = req.user._id;
 
-  ClothingItem.findByIdAndDelete(itemId)
+  ClothingItem.findById(itemId)
     .orFail()
+    .then((item) => {
+      const ownerId = item.owner.toString();
+
+      if (userId !== ownerId) {
+        return res
+          .status(FORBIDDEN)
+          .send({ message: "You do not have permission to delete this item" });
+      }
+    });
+
+  return ClothingItem.findByIdAndDelete(itemId)
     .then(() => res.status(200).send({ message: "Item Successfully Removed" }))
     .catch((error) => {
       if (error.name === "CastError") {

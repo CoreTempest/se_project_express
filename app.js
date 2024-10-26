@@ -4,6 +4,9 @@ const indexRouter = require("./routes/index");
 
 const app = express();
 const { PORT = 3001 } = process.env;
+const cors = require("cors");
+
+app.use(cors());
 
 mongoose.set("strictQuery", false);
 
@@ -13,13 +16,6 @@ mongoose
     // console.log("Connected to DB");
   })
   .catch(console.error);
-
-app.use((req, res, next) => {
-  req.user = {
-    _id: "5d8b8592978f8bd833ca8133",
-  };
-  next();
-});
 
 app.use(express.json());
 

@@ -49,6 +49,30 @@ const createUser = (req, res) => {
     });
 };
 
+const updateProfile = (req, res) => {
+  const userId = req.user._id;
+  const { name, avatar } = req.body;
+  User.findByIdAndUpdate(
+    userId,
+    { name, avatar },
+    { new: true, runValidators: true }
+  )
+    .then((updatedProfile) => {
+      if (!updatedProfile) {
+        return res.status(NOT_FOUND_CODE).send({ message: "User not found" });
+      }
+      return res.send(updatedProfile);
+    })
+    .catch((err) => {
+      if (err.name === "ValidationError") {
+        return res.status(BAD_REQUEST_CODE).send({ message: "Invalid Data" });
+      }
+      return res
+        .status(INT_SERVER_ERROR_CODE)
+        .send({ message: "An error has occurred" });
+    });
+};
+
 const login = (req, res) => {
   const { email, password } = req.body;
 
@@ -98,4 +122,4 @@ const getUserById = (req, res) => {
     });
 };
 
-module.exports = { getUsers, createUser, getUserById };
+module.exports = { getUsers, createUser, getUserById, login, updateProfile };
