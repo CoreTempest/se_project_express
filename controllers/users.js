@@ -9,25 +9,12 @@ const {
 
 const { JWT_SECRET } = require("../utils/config");
 
-// GET /users
-
-const getUsers = (req, res) => {
-  User.find({})
-    .then((users) => res.send(users))
-    .catch((err) => {
-      console.error(err);
-      return res
-        .status(INT_SERVER_ERROR_CODE)
-        .send({ message: `${INT_SERVER_ERROR_CODE} Server Error` });
-    });
-};
-
 const createUser = (req, res) => {
   const { name, avatar, email, password } = req.body;
   bcrypt
     .hash(password, 8)
-    .then((hash) =>
-      User.create({ name, avatar, email, password: hash }).then((user) =>
+    .then(() =>
+      User.create({ name, avatar, email, password }).then((user) =>
         res.status(201).send(user)
       )
     )
@@ -101,7 +88,7 @@ const login = (req, res) => {
 };
 
 const getUserById = (req, res) => {
-  const { userId } = req.params;
+  const userId = req.user._id;
   User.findById(userId)
     .orFail()
     .then((user) => res.send(user))
@@ -122,4 +109,4 @@ const getUserById = (req, res) => {
     });
 };
 
-module.exports = { getUsers, createUser, getUserById, login, updateProfile };
+module.exports = { createUser, getUserById, login, updateProfile };
