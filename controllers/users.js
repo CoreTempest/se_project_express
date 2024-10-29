@@ -1,3 +1,5 @@
+const jwt = require("jsonwebtoken");
+const bcrypt = require("bcryptjs");
 const User = require("../models/user");
 
 const {
@@ -5,6 +7,7 @@ const {
   BAD_REQUEST_CODE,
   NOT_FOUND_CODE,
   CONFLICT,
+  UNAUTHORIZED,
 } = require("../utils/errors");
 
 const { JWT_SECRET } = require("../utils/config");
@@ -65,7 +68,7 @@ const login = (req, res) => {
 
   if (!email || !password) {
     return res
-      .status(BAD_REQUEST)
+      .status(BAD_REQUEST_CODE)
       .send({ message: "Email and password are required" });
   }
   return User.findUserByCredentials(email, password)
@@ -82,7 +85,7 @@ const login = (req, res) => {
           .send({ message: "Incorrect email or password" });
       }
       return res
-        .status(INT_SERVER_ERROR)
+        .status(INT_SERVER_ERROR_CODE)
         .send({ message: "An error has occurred on the server" });
     });
 };

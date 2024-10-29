@@ -96,6 +96,7 @@ const deleteItem = (req, res) => {
           .status(FORBIDDEN)
           .send({ message: "You do not have permission to delete this item" });
       }
+      return returnError();
     });
 
   return ClothingItem.findByIdAndDelete(itemId)

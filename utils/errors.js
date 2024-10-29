@@ -16,13 +16,13 @@ const returnError = (res, error) => {
   if (error.name === "DocumentNotFoundError") {
     return res.status(NOT_FOUND_CODE).send({ message: error.message });
   }
-  if (err.name === "DuplicateError") {
+  if (error.name === "DuplicateError") {
     return res.status(CONFLICT).send({ message: error.message });
   }
-  if (err.name === "Unauthorized") {
+  if (error.name === "Unauthorized") {
     return res.status(UNAUTHORIZED).send({ message: error.message });
   }
-  if (err.name === "Forbidden") {
+  if (error.name === "Forbidden") {
     return res.status(FORBIDDEN).send({ message: error.message });
   }
   return res.status(INT_SERVER_ERROR_CODE).send({
