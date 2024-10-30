@@ -17,8 +17,8 @@ const createUser = (req, res) => {
   bcrypt
     .hash(password, 8)
     .then(() =>
-      User.create({ name, avatar, email, password }).then((user) =>
-        res.status(201).send(user)
+      User.create({ name, avatar, email }).then(() =>
+        res.status(201).send({ name, avatar, email })
       )
     )
     .catch((err) => {
