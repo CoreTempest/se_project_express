@@ -94,18 +94,12 @@ const deleteItem = (req, res) => {
       if (userId !== ownerId) {
         return res
           .status(FORBIDDEN)
-          .send({ message: "You do not have permission to delete this item" })
-          .catch((error) => returnError(res, error));
+          .send({ message: "You do not have permission to delete this item" });
       }
-      return returnError();
-    });
-
-  return ClothingItem.findById(itemId)
-    .then(() =>
-      ClothingItem.findByIdAndDelete(itemId).res.send({
-        message: "Item successfully deleted",
-      })
-    )
+      return ClothingItem.findByIdAndDelete(itemId).then(() =>
+        res.send({ message: "Item deleted successfully " })
+      );
+    })
     .catch((error) => {
       if (error.name === "CastError") {
         res
