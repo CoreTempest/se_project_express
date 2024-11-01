@@ -115,7 +115,6 @@ const deleteItem = (req, res) => {
           .status(INT_SERVER_ERROR_CODE)
           .send({ message: `${INT_SERVER_ERROR_CODE} Server Error` });
       }
-      return ClothingItem.findByIdAndDelete(itemId);
     });
 };
 
