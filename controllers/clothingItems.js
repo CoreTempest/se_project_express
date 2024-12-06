@@ -9,13 +9,12 @@ const {
 } = require("../utils/errors");
 
 const createItem = (req, res) => {
-  const { name, weather, imageUrl } = req.body;
-
   const owner = req.user._id;
+  const { name, weather, imageUrl } = req.body;
 
   ClothingItem.create({ name, weather, imageUrl, owner })
     .then((item) => {
-      res.send({ data: item });
+      res.status(201).send({ data: item });
     })
     .catch((error) => {
       if (error.name === "ValidationError") {
@@ -32,7 +31,7 @@ const createItem = (req, res) => {
 
 const getItems = (req, res) => {
   ClothingItem.find({})
-    .then((item) => res.status(200).send(item))
+    .then((items) => res.status(200).send(items))
     .catch((error) => {
       if (error.name === "ValidationError") {
         res
@@ -84,7 +83,6 @@ const dislikeItem = (req, res) => {
 
 const deleteItem = (req, res) => {
   const { itemId } = req.params;
-  const userId = req.user._id;
 
   ClothingItem.findById(itemId)
     .orFail()
