@@ -83,6 +83,7 @@ const dislikeItem = (req, res) => {
 
 const deleteItem = (req, res) => {
   const { itemId } = req.params;
+  const userId = req.user._id;
 
   ClothingItem.findById(itemId)
     .orFail()
