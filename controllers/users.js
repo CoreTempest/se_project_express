@@ -72,6 +72,7 @@ function getCurrentUser(req, res, next) {
         return next(new NotFoundError("Requested resource not found."));
       }
       return next(err);
+      console.log(err);
     });
 }
 
