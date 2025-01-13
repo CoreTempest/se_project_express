@@ -1,125 +1,135 @@
 const ClothingItem = require("../models/clothingItem");
+const NotFoundError = require("../errors/NotFoundError");
+const BadRequestError = require("../errors/BadRequestError");
+const ForbiddenError = require("../errors/ForbiddenError");
 
-const {
-  INT_SERVER_ERROR_CODE,
-  BAD_REQUEST_CODE,
-  NOT_FOUND_CODE,
-  FORBIDDEN,
-  returnError,
-} = require("../utils/errors");
-
-const createItem = (req, res) => {
-  const owner = req.user._id;
-  const { name, weather, imageUrl } = req.body;
-
-  ClothingItem.create({ name, weather, imageUrl, owner })
-    .then((item) => {
-      res.status(201).send({ data: item });
-    })
-    .catch((error) => {
-      if (error.name === "ValidationError") {
-        res
-          .status(BAD_REQUEST_CODE)
-          .send({ message: `${BAD_REQUEST_CODE} Validation Failed` });
-      } else {
-        res
-          .status(INT_SERVER_ERROR_CODE)
-          .send({ message: `${INT_SERVER_ERROR_CODE} Server Error` });
-      }
-    });
-};
-
-const getItems = (req, res) => {
+const getItems = (req, res, next) => {
   ClothingItem.find({})
-    .then((items) => res.status(200).send(items))
-    .catch((error) => {
-      if (error.name === "ValidationError") {
-        res
-          .status(BAD_REQUEST_CODE)
-          .send({ message: `${BAD_REQUEST_CODE} Validation Failed` });
-      } else {
-        res
-          .status(INT_SERVER_ERROR_CODE)
-          .send({ message: `${INT_SERVER_ERROR_CODE} Server Error` });
-      }
-    });
+    .then((items) => {
+      res.send({ data: items });
+    })
+    .catch(next);
 };
 
-const likeItem = (req, res) => {
-  ClothingItem.findByIdAndUpdate(
-    req.params.itemId,
-    { $addToSet: { likes: req.user._id } },
-    { new: true }
-  )
-    .orFail()
-    .then((item) => res.send({ data: item }))
-    .catch((error) => returnError(res, error));
-};
-
-const dislikeItem = (req, res) => {
-  ClothingItem.findByIdAndUpdate(
-    req.params.itemId,
-    { $pull: { likes: req.user._id } },
-    { new: true }
-  )
-    .orFail()
-    .then((item) => res.send({ data: item }))
-    .catch((error) => returnError(res, error));
-};
-
-/* const updateItem = (req, res) => {
+const getItem = (req, res, next) => {
   const { itemId } = req.params;
-  const { imageURL } = req.body;
-
-  ClothingItem.findByIdAndUpdate(itemId, { $set: { imageURL } })
-    .orFail()
-    .then((item) => res.status(200).send({ data: item }))
-    .catch((e) => {
-      res.status(INT_SERVER_ERROR_CODE).send({
-        message: `${INT_SERVER_ERROR_CODE}: an unknown error has occurred`,
-      });
-    });
-}; */
-
-const deleteItem = (req, res) => {
-  const { itemId } = req.params;
-  const userId = req.user._id;
-
   ClothingItem.findById(itemId)
     .orFail()
     .then((item) => {
-      const ownerId = item.owner.toString();
-
-      if (userId !== ownerId) {
-        return res
-          .status(FORBIDDEN)
-          .send({ message: "You do not have permission to delete this item" });
-      }
-      return ClothingItem.findByIdAndDelete(itemId).then(() =>
-        res.send({ message: "Item deleted successfully " })
-      );
+      res.send(item);
     })
-    .catch((error) => {
-      if (error.name === "CastError") {
-        res
-          .status(BAD_REQUEST_CODE)
-          .send({ message: `${BAD_REQUEST_CODE} Validation Failed` });
+    .catch((err) => {
+      if (err.name === "DocumentNotFoundError") {
+        return next(new NotFoundError("Requested resource not found."));
       }
-      if (error.name === "DocumentNotFoundError") {
-        res
-          .status(NOT_FOUND_CODE)
-          .send({ message: `${NOT_FOUND_CODE} Document Not Found` });
-      } else {
-        res
-          .status(INT_SERVER_ERROR_CODE)
-          .send({ message: `${INT_SERVER_ERROR_CODE} Server Error` });
+      return next(err);
+    });
+};
+
+const createItem = (req, res, next) => {
+  const { name, weather, imageUrl } = req.body;
+
+  ClothingItem.create({ name, weather, imageUrl, owner: req.user._id })
+    .then((item) => {
+      res.status(201).send(item);
+    })
+    .catch((err) => {
+      if (err.name === "ValidationError") {
+        return next(new BadRequestError("Invalid data entered"));
       }
+      if (err.name === "CastError") {
+        return next(new BadRequestError("Invalid data entered"));
+      }
+      return next(err);
+    });
+};
+
+const deleteItem = (req, res, next) => {
+  const { itemId } = req.params;
+  const currentUserId = req.user._id;
+
+  ClothingItem.findById(itemId)
+    .orFail()
+    .then((clothingItem) => {
+      const ownerId = clothingItem?.owner.toString();
+
+      if (!(currentUserId === ownerId)) {
+        return next(new ForbiddenError("You do not own this item."));
+      }
+
+      return ClothingItem.findByIdAndDelete(itemId).then((item) => {
+        res.send({ message: `deleted item with ID: ${item._id}` });
+      });
+    })
+    .catch((err) => {
+      if (err.name === "CastError") {
+        return next(new BadRequestError("Invalid data entered."));
+      }
+      if (err.name === "DocumentNotFoundError") {
+        return next(new NotFoundError("Requested resource not found."));
+      }
+      return next(err);
+    });
+};
+
+const likeItem = (req, res, next) => {
+  const { itemId } = req.params;
+  const user = req.user._id;
+  ClothingItem.findByIdAndUpdate(
+    itemId,
+    {
+      $addToSet: { likes: user },
+    },
+    {
+      new: true,
+    }
+  )
+    .orFail()
+    .then((item) => {
+      res.send({ data: item });
+    })
+    .catch((err) => {
+      if (err.name === "CastError") {
+        return next(new BadRequestError("Invalid data entered"));
+      }
+      if (err.name === "DocumentNotFoundError") {
+        return next(new NotFoundError("Requested resource not found"));
+      }
+      return next(err);
+    });
+};
+
+const dislikeItem = (req, res, next) => {
+  const { itemId } = req.params;
+  const user = req.user._id;
+  ClothingItem.findByIdAndUpdate(
+    itemId,
+    {
+      $pull: { likes: user },
+    },
+    {
+      new: true,
+    }
+  )
+    .orFail()
+    .then((item) => {
+      res.send({ data: item });
+    })
+    .catch((err) => {
+      if (err.name === "CastError") {
+        return next(new BadRequestError("Invalid data entered."));
+      }
+      if (err.name === "DocumentNotFoundError") {
+        return next(new NotFoundError("Requested resource not found"));
+      }
+      return next(err);
     });
 };
 
 module.exports = {
-  createItem,
   getItems,
+  getItem,
+  createItem,
   deleteItem,
   likeItem,
   dislikeItem,
