@@ -14,7 +14,7 @@ function createUser(req, res, next) {
   User.findOne({ email })
     .then((user) => {
       if (user) {
-        throw new DuplicateEmailError("Please use a different email");
+        throw new ConflictError("Please use a different email");
       }
       return bcrypt.hash(password, 10);
     })
