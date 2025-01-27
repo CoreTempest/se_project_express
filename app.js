@@ -4,7 +4,7 @@ const mongoose = require("mongoose");
 const cors = require("cors");
 const indexRouter = require("./routes/index");
 const errorHandler = require("./middleware/error-handler");
-const { requestLogger, errorLogger } = require("./middleware/logger");
+const { requestLogger } = require("./middleware/logger");
 
 const app = express();
 const { PORT = 3001 } = process.env;
