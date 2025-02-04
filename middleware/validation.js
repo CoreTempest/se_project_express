@@ -35,10 +35,10 @@ const validateUserCreation = celebrate({
       "string.uri": 'The "imageUrl" field must be a valid url',
     }),
     email: Joi.string().required().email().messages({
-      "string.empty": 'The "name" field can not be empty',
+      "string.empty": 'The "email" field can not be empty',
     }),
     password: Joi.string().required().min(8).messages({
-      "string.empty": 'The "name" field can not be empty',
+      "string.empty": 'The "password" field can not be empty',
     }),
   }),
 });
@@ -46,7 +46,7 @@ const validateUserCreation = celebrate({
 const validateUserAuthentication = celebrate({
   body: Joi.object().keys({
     email: Joi.string().required().email().messages({
-      "string.empty": 'The "name" field can not be empty',
+      "string.empty": 'The "email" field can not be empty',
     }),
     password: Joi.string().required().min(8).messages({
       "string.empty": 'The "name" field can not be empty',

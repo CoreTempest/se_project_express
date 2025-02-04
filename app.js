@@ -20,11 +20,11 @@ mongoose
   .catch(console.error);
 
 app.use(express.json());
-app.use("/", indexRouter);
 app.use(requestLogger);
+app.use("/", indexRouter);
+app.use(errorLogger);
 app.use(errors());
 app.use(errorHandler);
-app.use(errorLogger);
 
 app.listen(PORT, () => {
   console.log(`Server is running on PORT ${PORT}`);
