@@ -6,7 +6,7 @@ This back-end project is focused on creating a server for the WTWR application. 
 
 - [Domain name - Back End] (api.coretempest.jumpingcrab.com)
 
-- [Domain name - Front End] (coretempest.jumpingcrab.com)
+- [Domain name - Front End] (www.coretempest.jumpingcrab.com)
 
 `npm run start` — to launch the server
 
