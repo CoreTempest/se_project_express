@@ -21,16 +21,7 @@ mongoose
 
 app.use(express.json());
 app.use(requestLogger);
-app.use(
-  "/static",
-  express.static(path.join(__dirname, "public"), {
-    setHeaders: (res, path) => {
-      if (path.endsWith(".js")) {
-        res.set("Content-Type", "application/javascript");
-      }
-    },
-  })
-);
+app.use(express.static("public"));
 app.use("/", indexRouter);
 app.use(errorLogger);
 app.use(errors());
