@@ -21,7 +21,7 @@ mongoose
 
 app.use(express.json());
 app.use(requestLogger);
-// app.use(express.static(path.join(__dirname, "public")));
+app.use(express.static(path.join(__dirname, "public")));
 app.use("/", indexRouter);
 app.use(errorLogger);
 app.use(errors());
