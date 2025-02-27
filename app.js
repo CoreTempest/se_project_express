@@ -27,7 +27,7 @@ app.get("/crash-test", () => {
 
 app.use(express.json());
 app.use(requestLogger);
-app.use(express.static("public"));
+//app.use(express.static("public"));
 app.use("/", indexRouter);
 app.use(errorLogger);
 app.use(errors());
