@@ -6,7 +6,7 @@ const ForbiddenError = require("../errors/ForbiddenError");
 const getItems = (req, res, next) => {
   ClothingItem.find({})
     .then((items) => {
-      res.send({ data: items });
+      res.send(items);
     })
     .catch(next);
 };
