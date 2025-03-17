@@ -2,12 +2,14 @@ const express = require("express");
 const { errors } = require("celebrate");
 const mongoose = require("mongoose");
 require("dotenv").config();
+const cors = require("cors");
 const indexRouter = require("./routes/index");
 const errorHandler = require("./middleware/error-handler");
 const { requestLogger, errorLogger } = require("./middleware/logger");
+
 const app = express();
 const { PORT = 3001 } = process.env;
-const cors = require("cors");
+
 app.use(cors());
 
 mongoose.set("strictQuery", false);
